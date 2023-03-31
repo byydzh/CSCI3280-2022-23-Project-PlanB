@@ -417,7 +417,7 @@ QPushButton:hover{
 }</string>
              </property>
              <property name="text">
-              <string>search</string>
+              <string/>
              </property>
              <property name="placeholderText">
               <string>search</string>
@@ -675,41 +675,7 @@ QListView::item:selected {
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap resource="resource.qrc">:/images/images/Nagisa.png</pixmap>
-                 </property>
-                 <property name="scaledContents">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-                <widget class="QLabel" name="label_pic_hires">
-                 <property name="geometry">
-                  <rect>
-                   <x>5</x>
-                   <y>145</y>
-                   <width>20</width>
-                   <height>20</height>
-                  </rect>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>20</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>20</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
-                 </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap resource="resource.qrc">:/images/images/hi-res.jpg</pixmap>
+                  <pixmap resource="resource.qrc">:/images/images/skadi.jpg</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -749,9 +715,6 @@ QListView::item:selected {
                   <bool>true</bool>
                  </property>
                 </widget>
-                <zorder>label_pic_under</zorder>
-                <zorder>label_pic</zorder>
-                <zorder>label_pic_hires</zorder>
                </widget>
               </item>
              </layout>
