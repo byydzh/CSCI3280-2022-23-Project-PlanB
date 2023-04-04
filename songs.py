@@ -2,6 +2,7 @@ import os
 import re
 
 from mutagen.wave import WAVE   # need replaced in the future
+from mutagen.mp3 import MP3
 from mutagen import File        # don't need
 
 
@@ -38,11 +39,17 @@ class Song:
         if filetype in ['wav', 'wave']:
             self.audio_type = 'WAV'
             audio = WAVE(self.path)
-            print(self.path)
+            # print(self.path)
             self.parse_audio_info(audio.info)
             self.parse_id3_tag(audio)
             if self.title == 'None':
                 self.title = self.path.split('/')[-1].split('.')[0]
+
+        elif filetype == 'mp3':
+            self.audio_type = 'MP3'
+            audio = MP3(self.path)
+            self.parse_audio_info(audio.info)
+            self.parse_id3_tag(audio)
 
         else:
             self.audio_type = 'UNKNOWN'

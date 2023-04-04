@@ -16,14 +16,12 @@ from Ui_mainwindow import Ui_MainWindow
 from songs import Song
 
 
-VERSION = 'v0.1.0'
+VERSION = 'v0.1.1'
 
 
 class PlayerWindow(QtWidgets.QMainWindow):
-    """主窗体类"""
 
     def __init__(self):
-        # 继承父类
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -85,17 +83,15 @@ class PlayerWindow(QtWidgets.QMainWindow):
             print("not done")
 
 
-            # 歌词刷新计时器
-            self.lrc_timer = QTimer(self)
-            self.lrc_timer.timeout.connect(self.song_timer)
-            # 歌曲淡入淡出计时器
-            self.volume_smooth_timer = QTimer(self)
-            self.volume_smooth_timer.timeout.connect(self.volume_smooth_timeout)
-            self.volume_add_buffer = 0
-            self.volume_buffer = 0
-            self.volume_smooth_low_mode = True
-
-
+        # 歌词刷新计时器
+        self.lrc_timer = QTimer(self)
+        self.lrc_timer.timeout.connect(self.song_timer)
+        # 歌曲淡入淡出计时器
+        self.volume_smooth_timer = QTimer(self)
+        self.volume_smooth_timer.timeout.connect(self.volume_smooth_timeout)
+        self.volume_add_buffer = 0
+        self.volume_buffer = 0
+        self.volume_smooth_low_mode = True
 
         self.player = QMediaPlayer(flags=QMediaPlayer.Flags())  # 无参数也行，但是会有提示
         self.song_selected = Song(None)  # 当前音乐对象
@@ -137,11 +133,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.setting_path = 'setting.json'
 
         if os.path.exists(self.db_path):
-            # 载入配置文件
             self.load_setting()
 
     def load_setting(self):
-        """载入配置文件"""
         if not os.path.exists(self.setting_path):
             return
         with open('setting.json') as f:
@@ -169,7 +163,6 @@ class PlayerWindow(QtWidgets.QMainWindow):
             self.set_play_mode_stylesheet()
 
     def save_setting(self):
-        """保存配置文件"""
         config = {
             "directory_path": self.directory_path,
             "play_mode": self.play_mode,
@@ -268,18 +261,16 @@ class PlayerWindow(QtWidgets.QMainWindow):
                         self.volume_smooth_timer.stop()
 
     def volume_add(self, step=5):
-        """播放器音量加"""
         volume = self.player.volume()
         if volume + step > 100:
             volume = 100
         else:
             volume += step
         self.player.setVolume(volume)
-        print(f'音量调整至：{volume}')
+        print(f'Volume adjusted to: {volume}')
         self.volume_style_refresh()
 
     def volume_sub(self, step=5):
-        """播放器音量减"""
         volume = self.player.volume()
         if volume - step < 0:
             volume = 0
@@ -290,7 +281,6 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.volume_style_refresh()
 
     def volume_style_refresh(self):
-        """刷新音量显示样式"""
         volume = self.player.volume()
         if volume == 100:
             self.ui.pushButton_volume.setText('M')
@@ -298,7 +288,6 @@ class PlayerWindow(QtWidgets.QMainWindow):
             self.ui.pushButton_volume.setText(str(volume))
 
     def change_volume(self):
-        """按键切换音量档位"""
         volume = self.player.volume()
         if volume == 0:
             volume_out = 100
@@ -310,26 +299,22 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.volume_style_refresh()
 
     def change_sort_mode(self):
-        """切换排序模式"""
         self.sort_mode += 1
         if self.sort_mode > 2:
             self.sort_mode = 0
         self.set_sort_mode_stylesheet()
 
     def set_sort_mode_stylesheet(self):
-        """设置排序按钮样式"""
         if self.sort_mode == 0:
-            text = '按字母顺序正序排序'
+            text = 'Sort by alphabetical order'
         elif self.sort_mode == 1:
-            text = '按修改时间倒序排序'
+            text = 'Sort by modification time'
         else:
-            text = '按创建时间倒序排序'
+            text = 'Sort by creation time'
         self.ui.pushButton_change_sort_mode.setToolTip(text)
-        # 刷新列表显示
         self.select_songs(self.ui.lineEdit.text())
 
     def set_play_mode(self):
-        """设置播放模式"""
         if self.play_mode == 0:  # 顺序
             self.song_path_playlist.sort(key=lambda x: x['index'])
             if self.song_now_path != '':
@@ -369,9 +354,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.listWidget.clear()
         self.get_songs_count()
         if self.local_songs_count == 0:
-            mess_str = 'no wav file'
+            mess_str = 'no proper music file'
             print(mess_str)
-            QtWidgets.QMessageBox.information(self, "cannot find wav file", mess_str, QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.information(self, "cannot find music file", mess_str, QtWidgets.QMessageBox.Ok)
         else:
             self.ui.horizontalSlider.setMaximum(self.local_songs_count)
             self.ui.horizontalSlider.setMinimum(0)
@@ -384,7 +369,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
             for item in items:
                 file_path = f'{root}/{item}'
                 suffix = file_path.split('.')[-1].lower()
-                suffix_limit = ['wav'] 
+                suffix_limit = ['wav', 'wave', 'mp3'] 
                 # suffix_limit = ['flac', 'mp3', 'wav', 'wave', 'dsf', 'dff', 'dsdiff', 'ape', 'm4a'] 
                 if suffix not in suffix_limit:
                     continue
@@ -530,15 +515,12 @@ class PlayerWindow(QtWidgets.QMainWindow):
 
 
     def song_double_clicked(self):
-        """双击歌曲列表"""
-        # 获取列表索引值，获取歌曲路径
         song_index = self.ui.listWidget.currentRow()
         song_dict: dict = self.song_path_list[song_index]
         self.song_now_path = song_dict['path']
-        if self.play_mode == 2:  # 随机
-            # 打乱播放列表
+        if self.play_mode == 2:  # random
             random.shuffle(self.song_path_playlist)
-        # 将选中歌曲在播放列表中的索引设为当前索引
+
         for item in self.song_path_playlist:
             if item['path'] == self.song_now_path:
                 self.song_index = self.song_path_playlist.index(item)
@@ -559,11 +541,11 @@ class PlayerWindow(QtWidgets.QMainWindow):
         print(self.song_path_playlist)
         if len(self.song_path_playlist) == 0:
             return
-        elif self.play_mode != 1 and self.song_now_path != '':  # 非单曲循环，已载入歌曲
+        elif self.play_mode != 1 and self.song_now_path != '':
             self.song_index += 1
             if self.song_index > len(self.song_path_playlist) - 1:
                 self.song_index = 0
-        self.song_now_path = self.song_path_playlist[self.song_index]['path']  # 载入新的歌曲路径
+        self.song_now_path = self.song_path_playlist[self.song_index]['path']
         self.play_init()
         self.song_find()
 
@@ -571,7 +553,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         print('Last')
         if len(self.song_path_playlist) == 0:
             return
-        elif self.play_mode != 1 and self.song_now_path != '':  # 非单曲循环，已载入歌曲
+        elif self.play_mode != 1 and self.song_now_path != '':
             self.song_index -= 1
             if self.song_index < 0 or (self.song_index > len(self.song_path_playlist) - 1):
                 self.song_index = len(self.song_path_playlist) - 1
@@ -595,7 +577,6 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.lrc_timer.stop()
         self.is_started = False
         print('Pause')
-        # 注入样式表-暂停（图标为播放）
         self.ui.pushButton_start.setToolTip('播放')
         self.ui.pushButton_start.setStyleSheet("QPushButton{\n"
                                                "image: url(:/icon/images/暂停.png);\n}\n"
@@ -622,30 +603,25 @@ class PlayerWindow(QtWidgets.QMainWindow):
             self.volume_smooth_timer.start(1)
 
     def song_data_init(self):
-        # 获取歌曲信息
         self.song_selected = Song(self.song_now_path)
 
-        # 装填歌词
         self.song_lrc_init()
 
-        # 歌曲封面嵌入
         self.ui.label_pic.clear()
         pix = QPixmap()
         pix.loadFromData(self.song_selected.cover)
         self.ui.label_pic.setPixmap(pix)
         self.ui.label_pic.setScaledContents(True)
 
-        # 歌曲信息导入
         self.ui.listWidget_3.clear()
         self.ui.label_name.setText(self.song_selected.title)
         self.setWindowTitle(self.song_selected.title + ' - ' + self.song_selected.artist + ' - LrcMusicPlayer')
-        self.ui.listWidget_3.addItem(f'标题：{self.song_selected.title}')
-        self.ui.listWidget_3.addItem(f'艺术家：{self.song_selected.artist}')
-        self.ui.listWidget_3.addItem(f'专辑：{self.song_selected.album}')
-        self.ui.listWidget_3.addItem(f'日期：{self.song_selected.date}')
-        self.ui.listWidget_3.addItem(f'风格：{self.song_selected.genre}')
+        self.ui.listWidget_3.addItem(f'Title: {self.song_selected.title}')
+        self.ui.listWidget_3.addItem(f'Aritst:{self.song_selected.artist}')
+        self.ui.listWidget_3.addItem(f'Album: {self.song_selected.album}')
+        self.ui.listWidget_3.addItem(f'Date:  {self.song_selected.date}')
+        self.ui.listWidget_3.addItem(f'Genre: {self.song_selected.genre}')
 
-        # 音乐信息（隐藏MP3的位深信息）
         print(self.song_selected)
         if self.song_selected.bits_per_sample == 0:
             self.ui.label_info.setText(
@@ -707,7 +683,7 @@ class Thread(QtCore.QThread):
                     file_name = os.path.splitext(item)[0]
                     suffix = file_path.split('.')[-1].lower()
                     # suffix_limit = ['flac', 'mp3', 'wav', 'wave', 'dsf', 'dff', 'dsdiff', 'ape', 'm4a']
-                    suffix_limit = ['wav']
+                    suffix_limit = ['wav', 'wave', 'mp3']
                     if suffix not in suffix_limit:
                         continue
                     song = Song(file_path)
