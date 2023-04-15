@@ -568,9 +568,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
         print('Play')
         self.ui.pushButton_start.setToolTip('暂停')
         self.ui.pushButton_start.setStyleSheet("QPushButton{\n"
-                                               "image: url(:/icon/images/播放中.png);\n}\n"
+                                               "image: url(./images/pause button2.png);\n}\n"
                                                "QPushButton:hover{\n"
-                                               "image: url(:/icon/images/播放中 深色.png);\n}")
+                                               "image: url(./images/pause button2d.png);\n}")
 
     def song_pause(self):
         self.player.pause()
@@ -579,9 +579,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
         print('Pause')
         self.ui.pushButton_start.setToolTip('播放')
         self.ui.pushButton_start.setStyleSheet("QPushButton{\n"
-                                               "image: url(:/icon/images/暂停.png);\n}\n"
+                                               "image: url(./images/play button2.png);\n}\n"
                                                "QPushButton:hover{\n"
-                                               "image: url(:/icon/images/暂停 深色.png);\n}")
+                                               "image: url(./images/play button2d.png);\n}")
         
     def song_start_switch(self):
         if self.song_now_path == '' and self.local_songs_count != 0:

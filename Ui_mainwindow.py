@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'd:\cuhk\22-23 term2\CSCI3280\Project\The-New-Musicplayer\mainwindow.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(971, 514)
+        MainWindow.resize(971, 610)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/images/images/music.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -91,7 +91,7 @@ class Ui_MainWindow(object):
         self.widget_top.setMaximumSize(QtCore.QSize(16777215, 35))
         self.widget_top.setMouseTracking(False)
         self.widget_top.setStyleSheet("QWidget#widget_top{\n"
-"    background:rgb(245, 36, 67);\n"
+"    background:rgb(255, 255, 255);\n"
 "    border-top-right-radius:10px;\n"
 "    border-top-left-radius:10px;\n"
 "}")
@@ -111,13 +111,13 @@ class Ui_MainWindow(object):
         self.pushButton_update.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.pushButton_update.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButton_update.setStyleSheet("QPushButton{\n"
-"    background:rgb(245, 36, 67);\n"
+"    background:rgb(0, 255, 72);\n"
 "    border-radius:10px;\n"
 "    font: 9pt \"微软雅黑\";\n"
 "    color: #ff7043;\n"
 "}\n"
 "QPushButton:hover{\n"
-"    background:#e60039;\n"
+"    background:#24f5f2;\n"
 "}\n"
 "")
         self.pushButton_update.setObjectName("pushButton_update")
@@ -289,7 +289,6 @@ class Ui_MainWindow(object):
         item.setTextAlignment(QtCore.Qt.AlignCenter)
         font = QtGui.QFont()
         font.setBold(False)
-        font.setWeight(50)
         item.setFont(font)
         self.listWidget_2.addItem(item)
         item = QtWidgets.QListWidgetItem()
@@ -414,11 +413,12 @@ class Ui_MainWindow(object):
         self.pushButton_last.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.pushButton_last.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButton_last.setStyleSheet("QPushButton{\n"
-"    image: url(:/icon/images/上一曲.png);\n"
+"    image: url(./images/last.png);\n"
 "}\n"
 "QPushButton:hover{\n"
-"    image: url(:/icon/images/上一曲 深色.png);\n"
-"}")
+"    image: url(./images/lastd.png);\n"
+"}\n"
+"")
         self.pushButton_last.setText("")
         self.pushButton_last.setFlat(True)
         self.pushButton_last.setObjectName("pushButton_last")
@@ -429,10 +429,10 @@ class Ui_MainWindow(object):
         self.pushButton_start.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.pushButton_start.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButton_start.setStyleSheet("QPushButton{\n"
-"    image: url(:/icon/images/暂停.png);\n"
+"    image: url(./images/play button2.png);\n"
 "}\n"
 "QPushButton:hover{\n"
-"    image: url(:/icon/images/暂停 深色.png);\n"
+"    image: url(./images/play button2d.png);\n"
 "}")
         self.pushButton_start.setText("")
         self.pushButton_start.setFlat(True)
@@ -444,11 +444,12 @@ class Ui_MainWindow(object):
         self.pushButton_next.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.pushButton_next.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButton_next.setStyleSheet("QPushButton{\n"
-"    image: url(:/icon/images/下一曲.png);\n"
+"    image: url(./images/next.png);\n"
 "}\n"
 "QPushButton:hover{\n"
-"    image: url(:/icon/images/下一曲 深色.png);\n"
-"}")
+"    image: url(./images/nextd.png);\n"
+"}\n"
+"")
         self.pushButton_next.setText("")
         self.pushButton_next.setFlat(True)
         self.pushButton_next.setObjectName("pushButton_next")
@@ -458,10 +459,10 @@ class Ui_MainWindow(object):
         self.pushButton_change_sort_mode.setMaximumSize(QtCore.QSize(30, 30))
         self.pushButton_change_sort_mode.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pushButton_change_sort_mode.setStyleSheet("QPushButton{\n"
-"    image: url(:/icon/images/sea you next2.png);\n"
+"    image: url(./images/随机播放.png);\n"
 "}\n"
 "QPushButton:hover{\n"
-"    image: url(:/icon/images/排序 深色.png);\n"
+"    image: url(./images/随机播放 深色.png);\n"
 "}")
         self.pushButton_change_sort_mode.setText("")
         self.pushButton_change_sort_mode.setFlat(True)
@@ -594,21 +595,6 @@ class Ui_MainWindow(object):
         self.pushButton_volume.setFlat(True)
         self.pushButton_volume.setObjectName("pushButton_volume")
         self.horizontalLayout_right_btn.addWidget(self.pushButton_volume)
-        self.pushButton_random = QtWidgets.QPushButton(self.widget_bottom)
-        self.pushButton_random.setMinimumSize(QtCore.QSize(30, 30))
-        self.pushButton_random.setMaximumSize(QtCore.QSize(30, 30))
-        self.pushButton_random.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.pushButton_random.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.pushButton_random.setStyleSheet("QPushButton{\n"
-"    image: url(:/icon/images/列表循环.png);\n"
-"}\n"
-"QPushButton:hover{\n"
-"    image: url(:/icon/images/列表循环 深色.png);\n"
-"}")
-        self.pushButton_random.setText("")
-        self.pushButton_random.setFlat(True)
-        self.pushButton_random.setObjectName("pushButton_random")
-        self.horizontalLayout_right_btn.addWidget(self.pushButton_random)
         self.pushButton_is_online = QtWidgets.QPushButton(self.widget_bottom)
         self.pushButton_is_online.setMinimumSize(QtCore.QSize(30, 30))
         self.pushButton_is_online.setMaximumSize(QtCore.QSize(30, 30))
@@ -624,6 +610,21 @@ class Ui_MainWindow(object):
         self.pushButton_is_online.setFlat(True)
         self.pushButton_is_online.setObjectName("pushButton_is_online")
         self.horizontalLayout_right_btn.addWidget(self.pushButton_is_online)
+        self.pushButton_random = QtWidgets.QPushButton(self.widget_bottom)
+        self.pushButton_random.setMinimumSize(QtCore.QSize(30, 30))
+        self.pushButton_random.setMaximumSize(QtCore.QSize(30, 30))
+        self.pushButton_random.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.pushButton_random.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.pushButton_random.setStyleSheet("QPushButton{\n"
+"    image: url(:/icon/images/列表循环.png);\n"
+"}\n"
+"QPushButton:hover{\n"
+"    image: url(:/icon/images/列表循环 深色.png);\n"
+"}")
+        self.pushButton_random.setText("")
+        self.pushButton_random.setFlat(True)
+        self.pushButton_random.setObjectName("pushButton_random")
+        self.horizontalLayout_right_btn.addWidget(self.pushButton_random)
         self.horizontalLayout_6.addLayout(self.horizontalLayout_right_btn)
         self.verticalLayout_5.addWidget(self.widget_bottom)
         self.horizontalLayout_9.addWidget(self.widget)
