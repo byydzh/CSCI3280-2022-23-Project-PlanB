@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>971</width>
-    <height>514</height>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -132,7 +132,7 @@ QScrollBar::sub-line:vertical
          </property>
          <property name="styleSheet">
           <string notr="true">QWidget#widget_top{
-    background:rgb(245, 36, 67);
+    background:rgb(255, 255, 255);
 	border-top-right-radius:10px;
     border-top-left-radius:10px;
 }</string>
@@ -181,13 +181,13 @@ QScrollBar::sub-line:vertical
             </property>
             <property name="styleSheet">
              <string notr="true">QPushButton{
-	background:rgb(245, 36, 67);
+	background:rgb(0, 255, 72);
 	border-radius:10px;
 	font: 9pt &quot;微软雅黑&quot;;
 	color: #ff7043;
 }
 QPushButton:hover{
-	background:#e60039;
+	background:#24f5f2;
 }
 </string>
             </property>
@@ -556,7 +556,6 @@ QListView::item:selected {
               </property>
               <property name="font">
                <font>
-                <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
@@ -892,11 +891,12 @@ QPushButton:hover{
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton{
-	image: url(:/icon/images/上一曲.png);
+	image: url(./images/last.png);
 }
 QPushButton:hover{
-	image: url(:/icon/images/上一曲 深色.png);
-}</string>
+	image: url(./images/lastd.png);
+}
+</string>
               </property>
               <property name="text">
                <string/>
@@ -928,10 +928,10 @@ QPushButton:hover{
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton{
-	image: url(:/icon/images/暂停.png);
+	image: url(./images/play button2.png);
 }
 QPushButton:hover{
-	image: url(:/icon/images/暂停 深色.png);
+	image: url(./images/play button2d.png);
 }</string>
               </property>
               <property name="text">
@@ -964,11 +964,12 @@ QPushButton:hover{
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton{
-	image: url(:/icon/images/下一曲.png);
+	image: url(./images/next.png);
 }
 QPushButton:hover{
-	image: url(:/icon/images/下一曲 深色.png);
-}</string>
+	image: url(./images/nextd.png);
+}
+</string>
               </property>
               <property name="text">
                <string/>
@@ -997,10 +998,10 @@ QPushButton:hover{
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton{
-	image: url(:/icon/images/sea you next2.png);
+	image: url(./images/随机播放.png);
 }
 QPushButton:hover{
-	image: url(:/icon/images/排序 深色.png);
+	image: url(./images/随机播放 深色.png);
 }</string>
               </property>
               <property name="text">
@@ -1197,42 +1198,6 @@ QPushButton:hover{
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_random">
-              <property name="minimumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>30</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::NoFocus</enum>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-	image: url(:/icon/images/列表循环.png);
-}
-QPushButton:hover{
-	image: url(:/icon/images/列表循环 深色.png);
-}</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="flat">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="pushButton_is_online">
               <property name="minimumSize">
                <size>
@@ -1258,6 +1223,42 @@ QPushButton:hover{
 }
 QPushButton:hover{
 	image: url(:/icon/images/cloud_off 深色.png);
+}</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_random">
+              <property name="minimumSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+	image: url(:/icon/images/列表循环.png);
+}
+QPushButton:hover{
+	image: url(:/icon/images/列表循环 深色.png);
 }</string>
               </property>
               <property name="text">
