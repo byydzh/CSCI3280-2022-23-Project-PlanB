@@ -34,7 +34,7 @@ def broadcast_file(file_path, port):
             print("The program exits.")
             sys.exit()
         else:
-            print("Invalid input, please try again.")
+            print("Invalid input, program continues...")
 
 
 def download_file(file_path, host, port):
