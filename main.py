@@ -768,11 +768,13 @@ class PlayerWindow(QtWidgets.QMainWindow):
         
         
         if sharing_mode == "broadcast":
-            broadcast_file(file_path, port_number, repeat)
+            
+            broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number, repeat))
+            broadcast_thread.start()
         elif sharing_mode == "download":
             download_file(file_path, server_ip_address, port_number)
         
-        return sharing_mode, file_path, port_number, server_ip_address
+        return # sharing_mode, file_path, port_number, server_ip_address
 
         
  
