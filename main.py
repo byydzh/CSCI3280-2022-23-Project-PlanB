@@ -37,19 +37,11 @@ def broadcast_file(file_path, port, repeat):
 
     print(f"Broadcasting file: {file_path}")
 
-    for i in range(repeat):
-        client_socket, client_addr = server_socket.accept()
-        print(f"Connected to {client_addr}")
-        threading.Thread(target=send_file, args=(file_path, client_socket)).start()
-        choice = input("Please enter a number to select an action:")
+    client_socket, client_addr = server_socket.accept()
+    print(f"Connected to {client_addr}")
+    threading.Thread(target=send_file, args=(file_path, client_socket)).start()
 
-        if choice == "1":
-            print("program continues...")
-        elif choice == "2":
-            print("The program exits.")
-            sys.exit()
-        else:
-            print("Invalid input, program continues...")
+    sys.exit()
 
 
 def download_file(file_path, host, port):
@@ -768,12 +760,11 @@ class PlayerWindow(QtWidgets.QMainWindow):
         
         
         if sharing_mode == "broadcast":
-            
             broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number, repeat))
             broadcast_thread.start()
         elif sharing_mode == "download":
-            download_file(file_path, server_ip_address, port_number)
-        
+            download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
+            download_thread.start()
         return # sharing_mode, file_path, port_number, server_ip_address
 
         
