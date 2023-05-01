@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QCoreApplication, Qt, QUrl, QTimer, QPoint
 from PyQt5.QtGui import QPixmap, QFontDatabase
 from PyQt5 import QtCore
@@ -15,16 +16,70 @@ from sqlite_lib import UsingSqlite
 from Ui_mainwindow import Ui_MainWindow
 from songs import Song
 
-
+import socket
+import threading
+sharing = 0
 VERSION = 'v0.1.1'
+# p2p sharing function: send_file, broadcast_file, download_file
+def send_file(file_path, client_socket):
+    with open(file_path, "rb") as file:
+        chunk = file.read(1024)
+        while chunk:
+            client_socket.send(chunk)
+            chunk = file.read(1024)
+    client_socket.close()
+# some issue here, need to fix
+def broadcast_file(file_path, port):
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(("", port))
+    server_socket.listen(5)
 
+    print(f"Broadcasting file: {file_path}")
+
+    while True:
+        client_socket, client_addr = server_socket.accept()
+        print(f"Connected to {client_addr}")
+        threading.Thread(target=send_file, args=(file_path, client_socket)).start()
+        
+        
+def download_file(file_path, host, port):
+    download_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    download_socket.connect((host, port))
+
+    with open(file_path, "wb") as file:
+        chunk = download_socket.recv(1024)
+        while chunk:
+            file.write(chunk)
+            chunk = download_socket.recv(1024)
+
+    download_socket.close()
+    print(f"File downloaded: {file_path}")
+# make the window draggable
+class DraggableWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._is_dragging = False
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._is_dragging = True
+            self._drag_offset = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self._is_dragging:
+            self.parent().move(self.parent().pos() + event.pos() - self._drag_offset)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._is_dragging = False
 
 class PlayerWindow(QtWidgets.QMainWindow):
-
+ 
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
         # maybe for chinese, can be deleted if don't need
         if os.path.exists("fonts/霞鹜文楷.ttf"):
             QFontDatabase.addApplicationFont("fonts/霞鹜文楷.ttf")
@@ -33,6 +88,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.ui.pushButton_update.setText(VERSION)
+
+        self.ui.widget_top = DraggableWidget(self)
+        self.ui.widget_top.setGeometry(0, 0, 200, 30)
 
         # mouse
         self.setMouseTracking(True)
@@ -73,9 +131,10 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.horizontalSlider.sliderMoved.connect(self.slider_move)
         self.ui.pushButton_volume.clicked.connect(self.change_volume)
         self.ui.pushButton_change_sort_mode.clicked.connect(self.change_sort_mode)
+        self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
         try:
             self.ui.pushButton_random.clicked.connect(self.change_play_mode)
-            self.ui.pushButton_is_online.clicked.connect(self.change_lrc_mode)
+            
             self.ui.pushButton_is_trans.clicked.connect(self.change_trans_mode)
             self.ui.pushButton_update.clicked.connect(self.get_update)
         
@@ -425,7 +484,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
             })
             count += 1
         self.local_songs_count = count
-        self.ui.label_list_name.setText(f'song list（{count}）')
+        self.ui.label_list_name.setText(f'song list({count})')
 
     def update_songs(self):
 
@@ -474,7 +533,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
                     us.cursor.execute(sql, params)
                     print(f'remove{path}')
 
-                QtWidgets.QMessageBox.information(self, "datebase updated", QtWidgets.QMessageBox.Ok)
+                QtWidgets.QMessageBox.information(self, "database updated", QtWidgets.QMessageBox.Ok)
 
     def song_start_switch(self):
         if self.song_now_path == '' and self.local_songs_count != 0:
@@ -654,6 +713,51 @@ class PlayerWindow(QtWidgets.QMainWindow):
             item.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             self.ui.listWidget_2.addItem(item)
 
+    def p2p_share(self):
+        global sharing
+        dialog = QtWidgets.QDialog()
+        layout = QtWidgets.QVBoxLayout()
+        items = ["broadcast", "download"]
+        # get the sharing mode
+        sharing_mode, ok = QtWidgets.QInputDialog.getItem(dialog, "Sharing Mode", "Enter sharing mode:", items, 0, False)
+        if not ok:
+            return None, None, None, None
+        # get the file path
+        if sharing_mode == "broadcast":    
+            file_path, format=  QFileDialog.getOpenFileName(None, "Open File", "", "(*.wav)")
+            if file_path == "":
+                return None, None, None, None
+            
+        elif sharing_mode == "download":
+            directory_path = QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory", "", options=QtWidgets.QFileDialog.ShowDirsOnly)
+            if directory_path == "":
+                return None, None, None, None
+            i = 1
+            while True:
+                file_name = str(i) + '.wav'
+                file_path = directory_path + '/'+ file_name
+                if not os.path.exists(file_path):
+                    break
+                i += 1
+            
+        # get the port number    
+        port_number, ok = QtWidgets.QInputDialog.getInt(dialog, "Port Number", "Enter port number:")
+        if not ok:
+            return None, None, None, None
+        # get the server ip address    
+        server_ip_address, ok = QtWidgets.QInputDialog.getText(dialog, "Server IP Address", "Enter server IP address:")
+        if not ok:
+            return None, None, None, None
+        sharing = 1
+        if sharing_mode == "broadcast":
+            broadcast_file(file_path, port_number)
+        elif sharing_mode == "download":
+            download_file(file_path, server_ip_address, port_number)
+        
+        return sharing_mode, file_path, port_number, server_ip_address
+
+        
+ 
 
 class Thread(QtCore.QThread):
     signal_stop = QtCore.pyqtSignal()
