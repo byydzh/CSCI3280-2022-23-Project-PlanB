@@ -6,11 +6,14 @@ from PyQt5 import QtCore
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QListWidgetItem
 from pypinyin import lazy_pinyin, Style
+from pydub import AudioSegment
 
+import sqlite3
 import os
 import sys
 import random
 import json
+
 
 from sqlite_lib import UsingSqlite
 from Ui_mainwindow import Ui_MainWindow
@@ -19,7 +22,9 @@ from songs import Song
 import socket
 import threading
 sharing = 0
-VERSION = 'v0.1.1'
+VERSION = 'v0.2.0'
+third_party_db_path = ""
+
 # p2p sharing function: send_file, broadcast_file, download_file
 def send_file(file_path, client_socket):
     with open(file_path, "rb") as file:
@@ -62,19 +67,86 @@ def download_file_multi(file_path, host1, port1, host2, port2):
     download_socket1.connect((host1, port1))
     download_socket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     download_socket2.connect((host2, port2))
-    with open(file_path, "wb") as file:
+    file_data1 = bytearray()
+    file_data2 = bytearray()
+
+    chunk1 = download_socket1.recv(1024)
+    chunk2 = download_socket2.recv(1024)
+    while chunk1:
+        file_data1.extend(chunk1)
         chunk1 = download_socket1.recv(1024)
+    while chunk2:
+        file_data2.extend(chunk2)
         chunk2 = download_socket2.recv(1024)
-        while chunk1:
-            file.write(chunk1)
-            chunk1 = download_socket1.recv(1024)
-            chunk2 = download_socket2.recv(1024)
-            if not chunk1:
-                break
-            file.write(chunk2)
-            chunk1 = download_socket1.recv(1024)
-            chunk2 = download_socket2.recv(1024)
+
+    download_socket1.close()
+    download_socket2.close()
+
+    merged_data = bytearray()
+    i, j = 0, 0
+    flag = 0
+    while i < len(file_data1) and j < len(file_data2):
+        if flag==0:
+            merged_data.append(file_data1[i])
+            flag = 1
+        else:
+            merged_data.append(file_data2[j])
+            flag = 0
+        i += 1
+        j += 1
+
+    while i < len(file_data1):
+        merged_data.append(file_data1[i])
+        i += 1
+
+    while j < len(file_data2):
+        merged_data.append(file_data2[j])
+        j += 1
+
+    with open(file_path, "wb") as file:
+        file.write(merged_data)
+
+    print(f"File downloaded: {file_path}")
+
+def download_file_living(file_path, host, port):
+    download_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    download_socket.connect((host, port))
+    file_data = bytearray()
+
+    chunk = download_socket.recv(1024)
+
+    while chunk:
+        file_data.extend(chunk)
+        chunk = download_socket.recv(1024)
+
+    download_socket.close()
+    merged_data = bytearray()
+    i = 0
+
+    while i < len(file_data):
+        merged_data.append(file_data[i])
+        i += 1
+    with open(file_path, "wb") as file:
+        file.write(merged_data)
+    split_wav_file(file_path, output_dir="output")
+    os.remove(file_path)
+
+def split_wav_file(input_file, output_dir, chunk_size=1024):
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     
+    audio = AudioSegment.from_wav(input_file)
+    audio_length = len(audio)
+    num_chunks = audio_length // chunk_size + (1 if audio_length % chunk_size != 0 else 0)
+
+    for i in range(num_chunks):
+        start_time = i * chunk_size
+        end_time = min((i + 1) * chunk_size, audio_length)
+        chunk = audio[start_time:end_time]
+        chunk.export(os.path.join(output_dir, f"chunk_{i}.wav"), format="wav")
+        #print(f"Saved chunk {i + 1} of {num_chunks}")
+
+
 # make the window draggable
 class DraggableWidget(QWidget):
     def __init__(self, parent=None):
@@ -154,6 +226,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_change_sort_mode.clicked.connect(self.change_sort_mode)
         self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
         self.ui.pushButton_random.clicked.connect(self.p2p_share_multi)
+        self.ui.pushButton_path_2.clicked.connect(self.setthirddir)
         try:
             
             self.ui.pushButton_is_trans.clicked.connect(self.change_trans_mode)
@@ -470,6 +543,13 @@ class PlayerWindow(QtWidgets.QMainWindow):
         if os.path.exists(self.db_path):
             self.select_songs(self.ui.lineEdit.text())
 
+    def setthirddir(self):
+        global third_party_db_path
+        dir, format=  QFileDialog.getOpenFileName(None, "Open 3rd party DB File", "", "(*.db)")
+        if dir == "":
+            return
+        third_party_db_path = dir
+        
     def select_songs(self, text):
         with UsingSqlite() as us:
             text = '%{}%'.format(text)
@@ -780,7 +860,12 @@ class PlayerWindow(QtWidgets.QMainWindow):
             broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number))
             broadcast_thread.start()
         elif sharing_mode == "download":
-            download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
+            living, ok = QtWidgets.QInputDialog.getText(dialog, "living?", "Enter Y/N:")
+            print(living)
+            if living == 'Y':
+                download_thread = threading.Thread(target=download_file_living, args=(file_path, server_ip_address, port_number))
+            else:
+                download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
             download_thread.start()
         return # sharing_mode, file_path, port_number, server_ip_address
     
