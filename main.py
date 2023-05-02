@@ -236,37 +236,37 @@ class PlayerWindow(QtWidgets.QMainWindow):
             print("not done")
 
 
-        # 歌词刷新计时器
+        # Lyric refresh timer
         self.lrc_timer = QTimer(self)
         self.lrc_timer.timeout.connect(self.song_timer)
-        # 歌曲淡入淡出计时器
+        # Song Fade Timer
         self.volume_smooth_timer = QTimer(self)
         self.volume_smooth_timer.timeout.connect(self.volume_smooth_timeout)
         self.volume_add_buffer = 0
         self.volume_buffer = 0
         self.volume_smooth_low_mode = True
 
-        self.player = QMediaPlayer(flags=QMediaPlayer.Flags())  # 无参数也行，但是会有提示
-        self.song_selected = Song(None)  # 当前音乐对象
-        self.song_path_list = []  # 歌曲路径列表
-        self.song_path_playlist = []  # 歌曲路径播放列表
-        self.local_path_list = []  # 本地歌曲路径列表
-        self.local_songs_count = 0  # 歌曲计数
-        self.directory_path = ''  # 歌曲文件夹路径
-        self.song_now_path = ''  # 当前歌曲路径
-        self.is_started = False  # 播放按钮状态
-        self.is_sliderPress = False  # 进度条按压状态
-        self.lrc_time_index = 0  # 歌词时间戳标记
-        self.song_index = 0  # 歌曲标记
-        self.lrc_time_list = []  # 歌词时间戳列表
-        self.play_mode = 0  # 播放模式
-        self.lrc_mode = 0  # 歌词模式
-        self.is_window_maximized = False  # 窗口最大化状态
-        self.volume_change_mode = 0  # 点击的音量档位
-        self.sort_mode = 0  # 排序方式
+        self.player = QMediaPlayer(flags=QMediaPlayer.Flags())  
+        self.song_selected = Song(None)  # current song
+        self.song_path_list = []  # song path list
+        self.song_path_playlist = []  # song path play list
+        self.local_path_list = []  # local path list
+        self.local_songs_count = 0  # songs number count
+        self.directory_path = ''  # song directory path
+        self.song_now_path = ''  # current song path
+        self.is_started = False  # start status default to False
+        self.is_sliderPress = False  # slide press status default to False
+        self.lrc_time_index = 0  # lyric time index
+        self.song_index = 0  # song index
+        self.lrc_time_list = []  # lyric time list
+        self.play_mode = 0  # play mode
+        self.lrc_mode = 0  # lyric mode
+        self.is_window_maximized = False  # maximize window
+        self.volume_change_mode = 0  # change volume mode
+        self.sort_mode = 0  # sort mode
 
-        self.ui.lineEdit.setClearButtonEnabled(True)  # 显示一个清空按钮
-        self.player.setVolume(90)  # 默认音量
+        self.ui.lineEdit.setClearButtonEnabled(True)  # show a clear button
+        self.player.setVolume(90)  # default volume
         # self.volume_style_refresh() 
 
         self.ui.listWidget_2.setWordWrap(True)
@@ -327,87 +327,87 @@ class PlayerWindow(QtWidgets.QMainWindow):
             json.dump(config, f)
     
     def slider_move(self):
-        """移动滑条，刷新标签"""
+        """Move slider, refresh tab"""
         self.ui.label_time_start.setText(self.ms_to_str(self.ui.horizontalSlider.value()))
 
     def slider_release(self):
-        """释放滑条，调整进度"""
+        """Release the slider to adjust the progress"""
         self.player.setPosition(self.ui.horizontalSlider.value())
         self.lrc_time_index = 0
         self.is_sliderPress = False
 
     def slider_press(self):
-        """按下滑条"""
+        """press the slide bar"""
         self.is_sliderPress = True
 
     def lrc_double_clicked(self):
-        """双击歌词，跳转对应时间"""
-        # 已获取歌词时间戳
+        """Double-click the lyrics to jump to the corresponding time"""
+        # The timestamp of the lyrics has been obtained
         if len(self.lrc_time_list) != 0:
-            print(f'跳转至{self.lrc_time_list[self.ui.listWidget_2.currentRow()]}')
+            print(f'jump to {self.lrc_time_list[self.ui.listWidget_2.currentRow()]}')
             self.player.setPosition(self.lrc_time_list[self.ui.listWidget_2.currentRow()])
             self.lrc_time_index = 0
 
     @staticmethod
     def ms_to_str(ms):
-        """将毫秒时间转换为时间标签"""
+        """Convert millisecond time to timestamp"""
         s, ms = divmod(ms, 1000)
         m, s = divmod(s, 60)
         # h, m = divmod(m, 60)
         return f'{str(m).zfill(2)}:{str(s).zfill(2)}'
 
     def song_timer(self):
-        """定时器,500ms"""
-        # 时间标签格式化
+        """timer，500ms"""
+        # time stamp formatting
         if not self.is_sliderPress:
             self.ui.label_time_start.setText(self.ms_to_str(self.player.position()))
             self.ui.label_time_end.setText(self.ms_to_str(self.player.duration()))
-        # 歌词时间戳定位
+        # Lyric Timestamp Positioning
         if len(self.lrc_time_list) != 0:
             while True:
-                # 保证列表不超限
+                # Guarantee that the list does not exceed the limit
                 if self.lrc_time_index > len(self.lrc_time_list) - 1:
                     break
-                # 匹配歌词时间
+                # Match Lyric Time
                 elif self.lrc_time_list[self.lrc_time_index] < self.player.position():
                     self.lrc_time_index += 1
                 else:
                     break
-            # 移动到对应位置并选中
+            # Move to the corresponding position and select
             # self.ui.listWidget_2.verticalScrollBar().setSliderPosition(self.lrc_time_index - 1)
             self.ui.listWidget_2.setCurrentRow(self.lrc_time_index - 1)
             item = self.ui.listWidget_2.item(self.lrc_time_index - 1)
             self.ui.listWidget_2.scrollToItem(item, QtWidgets.QAbstractItemView.PositionAtCenter)
 
-        # 设定滑条限度
+        # set slider limits
         self.ui.horizontalSlider.setMaximum(self.player.duration())
         self.ui.horizontalSlider.setMinimum(0)
-        # 释放滑条，调整进度
+        # Release the slider to adjust the progress
         if not self.is_sliderPress:
             self.ui.horizontalSlider.setValue(self.player.position())
-        # 歌曲播放完毕
+        # song finished
         if self.player.position() == self.player.duration():
             print('Time over')
             self.play_next()
 
     def volume_smooth_timeout(self):
-        """音量淡入淡出"""
-        volume = self.volume_buffer  # 获取音量真值
-        if volume == 0:  # 排除静音状态
+        """volume fade"""
+        volume = self.volume_buffer  # get the volume
+        if volume == 0:  # in case volume = 0
             self.volume_smooth_timer.stop()
         else:
-            volume_step = volume/500  # 1ms中断一次，共500ms，即进入500次
+            volume_step = volume/500  # Interrupt once every 1ms, a total of 500ms, that is, enter 500 times
             self.volume_add_buffer += volume_step
-            if self.volume_add_buffer > 1:  # 缓存浮点数，传递整数
+            if self.volume_add_buffer > 1:  # Cache floats, pass integers
                 self.volume_add_buffer -= 1
-                if self.volume_smooth_low_mode:  # 暂停
+                if self.volume_smooth_low_mode:  # parse
                     if self.player.volume() - 1 >= 0:
                         self.player.setVolume(self.player.volume() - 1)
                     else:
                         self.song_pause()
                         self.volume_smooth_timer.stop()
                         self.player.setVolume(volume)
-                else:  # 播放
+                else:  # play
                     if self.player.volume() + 1 <= volume:
                         self.player.setVolume(self.player.volume() + 1)
                     else:
@@ -468,15 +468,15 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.select_songs(self.ui.lineEdit.text())
 
     def set_play_mode(self):
-        if self.play_mode == 0:  # 顺序
+        if self.play_mode == 0:  # in order
             self.song_path_playlist.sort(key=lambda x: x['index'])
             if self.song_now_path != '':
                 for item in self.song_path_playlist:
                     if item['path'] == self.song_now_path:
                         self.song_index = self.song_path_playlist.index(item)
-        elif self.play_mode == 1:  # 单曲
+        elif self.play_mode == 1:  # single recycle
             pass
-        elif self.play_mode == 2:  # 随机
+        elif self.play_mode == 2:  # random
             random.shuffle(self.song_path_playlist)
 
     def set_play_mode_stylesheet(self):
