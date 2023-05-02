@@ -14,7 +14,7 @@ import os
 import sys
 import random
 import json
-
+import music_tag
 
 
 from sqlite_lib import UsingSqlite
@@ -233,6 +233,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_change_sort_mode.clicked.connect(self.change_sort_mode)
         self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
         self.ui.pushButton_random.clicked.connect(self.p2p_share_multi)
+        self.ui.pushButton_random_2.clicked.connect(self.set_metadata)
         self.ui.pushButton_path_2.clicked.connect(self.setthirddir)
        
         try:
@@ -971,7 +972,34 @@ class PlayerWindow(QtWidgets.QMainWindow):
             download_thread.start()
         return
 
-        
+    def set_metadata(self):
+        dialog = QtWidgets.QDialog()
+        mypath = self.song_path_playlist[self.song_index]['path']
+        f = music_tag.load_file(mypath)
+        print(mypath)
+        title = f['title']
+        artist = f['artist']
+        album = f['album'] 
+        #date = f['date']
+        genre = f['genre']
+        title, ok = QtWidgets.QInputDialog.getText(dialog, "new title", "Enter new title:")
+        if ok:
+            f['title'] = title
+        artist, ok = QtWidgets.QInputDialog.getText(dialog, "new artist", "Enter new artist:")
+        if ok:
+            f['artist'] = artist
+        album, ok = QtWidgets.QInputDialog.getText(dialog, "new album", "Enter new album:")
+        if ok:
+            f['album'] = album
+        #date, ok = QtWidgets.QInputDialog.getText(dialog, "new date", "Enter new date:")
+        #if ok:
+        #    f['date'] = date
+        genre, ok = QtWidgets.QInputDialog.getText(dialog, "new genre", "Enter new genre:")
+        if ok:
+            f['genre'] = genre
+
+        f.save()
+
  
 
 class Thread(QtCore.QThread):
