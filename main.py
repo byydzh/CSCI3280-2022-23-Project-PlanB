@@ -24,6 +24,7 @@ import threading
 sharing = 0
 VERSION = 'v0.2.0'
 third_party_db_path = ""
+SPECIAL_FILE_IDENTIFIER = "SPECIAL_FILE_IDENTIFIER"
 
 # p2p sharing function: send_file, broadcast_file, download_file
 def send_file(file_path, client_socket):
@@ -145,6 +146,22 @@ def split_wav_file(input_file, output_dir, chunk_size=1024):
         chunk = audio[start_time:end_time]
         chunk.export(os.path.join(output_dir, f"chunk_{i}.wav"), format="wav")
         #print(f"Saved chunk {i + 1} of {num_chunks}")
+
+def create_special_file(filename):
+    with open(filename, "w") as f:
+        f.write(SPECIAL_FILE_IDENTIFIER)
+
+def is_special_file(filename):
+    try:
+        with open(filename, "r") as f:
+            content = f.read()
+            if SPECIAL_FILE_IDENTIFIER in content:
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        print("File do not exist")
+        return False
 
 
 # make the window draggable
@@ -430,7 +447,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         else:
             volume -= step
         self.player.setVolume(volume)
-        print(f'音量调整至：{volume}')
+        print(f'Volume to: {volume}')
         self.volume_style_refresh()
 
     def volume_style_refresh(self):
