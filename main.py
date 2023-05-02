@@ -30,7 +30,7 @@ def send_file(file_path, client_socket):
     client_socket.close()
 
 
-def broadcast_file(file_path, port, repeat):
+def broadcast_file(file_path, port):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(("", port))
     server_socket.listen(5)
@@ -727,17 +727,20 @@ class PlayerWindow(QtWidgets.QMainWindow):
             return None, None, None, None
         # get the file path
         if sharing_mode == "broadcast":    
-            file_path, format=  QFileDialog.getOpenFileName(None, "Open File", "", "(*.wav)")
+            file_path, format=  QFileDialog.getOpenFileName(None, "Open File", "", "(*.*)")
             if file_path == "":
                 return None, None, None, None
             
         elif sharing_mode == "download":
+            format, ok = QtWidgets.QInputDialog.getText(dialog, "File Format", "Enter file format:")
+            if not ok:
+                return None, None, None, None
             directory_path = QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory", "", options=QtWidgets.QFileDialog.ShowDirsOnly)
             if directory_path == "":
                 return None, None, None, None
             i = 1
             while True:
-                file_name = str(i) + '.wav'
+                file_name = str(i) + '.' + format
                 file_path = directory_path + '/'+ file_name
                 if not os.path.exists(file_path):
                     break
@@ -748,19 +751,15 @@ class PlayerWindow(QtWidgets.QMainWindow):
         if not ok:
             return None, None, None, None
         
-        # get the server ip address or repeat times
-        if sharing_mode == "broadcast":
-            repeat, ok = QtWidgets.QInputDialog.getInt(dialog, "Repeat Time", "Enter Repeat Time:")
-            if not ok:
-                return None, None, None, None
-        elif sharing_mode == "download":
+        # get the server ip address        
+        if sharing_mode == "download":
             server_ip_address, ok = QtWidgets.QInputDialog.getText(dialog, "Server IP Address", "Enter server IP address:")
             if not ok:
                 return None, None, None, None
         
         
         if sharing_mode == "broadcast":
-            broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number, repeat))
+            broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number))
             broadcast_thread.start()
         elif sharing_mode == "download":
             download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
@@ -816,23 +815,6 @@ class Thread(QtCore.QThread):
         self.signal_stop.emit()
 
 
-
-class FileSendThread(QtCore.QThread):
-    finished = QtCore.pyqtSignal()
-
-    def __init__(self, file_path, client_socket):
-        super().__init__()
-        self.file_path = file_path
-        self.client_socket = client_socket
-
-    def run(self):
-        with open(self.file_path, "rb") as file:
-            chunk = file.read(1024)
-            while chunk:
-                self.client_socket.send(chunk)
-                chunk = file.read(1024)
-        self.client_socket.close()
-        self.finished.emit()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv) 
