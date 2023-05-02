@@ -1,8 +1,8 @@
 import os
 import re
 
-# from mutagen.wave import WAVE   # need replaced in the future
-from wavePlayer import WAVE
+from mutagen.wave import WAVE   # 3rd wave lib
+# from wavePlayer import WAVE   # our wave lib
 from mutagen.mp3 import MP3
 from mutagen import File        # don't need
 
