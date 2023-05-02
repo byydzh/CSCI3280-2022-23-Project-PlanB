@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow.ui'
+# Form implementation generated from reading ui file 'd:\cuhk\22-23 term2\CSCI3280\Project\CSCI3280-2022-23-Project-PlanB-main\mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
