@@ -6,8 +6,7 @@ from PyQt5 import QtCore
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QListWidgetItem
 from pypinyin import lazy_pinyin, Style
-from pydub import AudioSegment
-
+import sqlite3
 import os
 import sys
 import random
@@ -20,10 +19,8 @@ from songs import Song
 
 import socket
 import threading
-sharing = 0
-VERSION = 'v0.2.0'
-
-
+third_party_db_path = ""
+VERSION = 'v0.1.1'
 # p2p sharing function: send_file, broadcast_file, download_file
 def send_file(file_path, client_socket):
     with open(file_path, "rb") as file:
@@ -108,45 +105,6 @@ def download_file_multi(file_path, host1, port1, host2, port2):
     print(f"File downloaded: {file_path}")
 
 
-def download_file_living(file_path, host, port):
-    download_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    download_socket.connect((host, port))
-    file_data = bytearray()
-
-    chunk = download_socket.recv(1024)
-
-    while chunk:
-        file_data.extend(chunk)
-        chunk = download_socket.recv(1024)
-
-    download_socket.close()
-    merged_data = bytearray()
-    i = 0
-
-    while i < len(file_data):
-        merged_data.append(file_data[i])
-        i += 1
-    with open(file_path, "wb") as file:
-        file.write(merged_data)
-    split_wav_file(file_path, output_dir="output")
-    os.remove(file_path)
-
-def split_wav_file(input_file, output_dir, chunk_size=1024):
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-    
-    audio = AudioSegment.from_wav(input_file)
-    audio_length = len(audio)
-    num_chunks = audio_length // chunk_size + (1 if audio_length % chunk_size != 0 else 0)
-
-    for i in range(num_chunks):
-        start_time = i * chunk_size
-        end_time = min((i + 1) * chunk_size, audio_length)
-        chunk = audio[start_time:end_time]
-        chunk.export(os.path.join(output_dir, f"chunk_{i}.wav"), format="wav")
-        #print(f"Saved chunk {i + 1} of {num_chunks}")
-
-
 # make the window draggable
 class DraggableWidget(QWidget):
     def __init__(self, parent=None):
@@ -226,6 +184,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_change_sort_mode.clicked.connect(self.change_sort_mode)
         self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
         self.ui.pushButton_random.clicked.connect(self.p2p_share_multi)
+        self.ui.pushButton_path_2.clicked.connect(self.setthirddir)
         try:
             
             self.ui.pushButton_is_trans.clicked.connect(self.change_trans_mode)
@@ -356,7 +315,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         return f'{str(m).zfill(2)}:{str(s).zfill(2)}'
 
     def song_timer(self):
-        """定时器，500ms"""
+        """定时器,500ms"""
         # 时间标签格式化
         if not self.is_sliderPress:
             self.ui.label_time_start.setText(self.ms_to_str(self.player.position()))
@@ -542,6 +501,13 @@ class PlayerWindow(QtWidgets.QMainWindow):
         if os.path.exists(self.db_path):
             self.select_songs(self.ui.lineEdit.text())
 
+    def setthirddir(self):
+        global third_party_db_path
+        dir, format=  QFileDialog.getOpenFileName(None, "Open 3rd party DB File", "", "(*.db)")
+        if dir == "":
+            return
+        third_party_db_path = dir
+        
     def select_songs(self, text):
         with UsingSqlite() as us:
             text = '%{}%'.format(text)
@@ -852,12 +818,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
             broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number))
             broadcast_thread.start()
         elif sharing_mode == "download":
-            living, ok = QtWidgets.QInputDialog.getText(dialog, "living?", "Enter Y/N:")
-            print(living)
-            if living == 'Y':
-                download_thread = threading.Thread(target=download_file_living, args=(file_path, server_ip_address, port_number))
-            else:
-                download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
+            download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
             download_thread.start()
         return # sharing_mode, file_path, port_number, server_ip_address
     
