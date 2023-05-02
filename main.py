@@ -56,6 +56,24 @@ def download_file(file_path, host, port):
 
     download_socket.close()
     print(f"File downloaded: {file_path}")
+
+def download_file_multi(file_path, host1, port1, host2, port2):
+    download_socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    download_socket1.connect((host1, port1))
+    download_socket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    download_socket2.connect((host2, port2))
+    with open(file_path, "wb") as file:
+        chunk1 = download_socket1.recv(1024)
+        chunk2 = download_socket2.recv(1024)
+        while chunk1:
+            file.write(chunk1)
+            chunk1 = download_socket1.recv(1024)
+            chunk2 = download_socket2.recv(1024)
+            if not chunk1:
+                break
+            file.write(chunk2)
+            chunk1 = download_socket1.recv(1024)
+            chunk2 = download_socket2.recv(1024)
     
 # make the window draggable
 class DraggableWidget(QWidget):
@@ -135,8 +153,8 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_volume.clicked.connect(self.change_volume)
         self.ui.pushButton_change_sort_mode.clicked.connect(self.change_sort_mode)
         self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
+        self.ui.pushButton_random.clicked.connect(self.p2p_share_multi)
         try:
-            self.ui.pushButton_random.clicked.connect(self.change_play_mode)
             
             self.ui.pushButton_is_trans.clicked.connect(self.change_trans_mode)
             self.ui.pushButton_update.clicked.connect(self.get_update)
@@ -717,9 +735,9 @@ class PlayerWindow(QtWidgets.QMainWindow):
             self.ui.listWidget_2.addItem(item)
 
     def p2p_share(self):
-        global sharing
+        
         dialog = QtWidgets.QDialog()
-        layout = QtWidgets.QVBoxLayout()
+        
         items = ["broadcast", "download"]
         # get the sharing mode
         sharing_mode, ok = QtWidgets.QInputDialog.getItem(dialog, "Sharing Mode", "Enter sharing mode:", items, 0, False)
@@ -765,6 +783,61 @@ class PlayerWindow(QtWidgets.QMainWindow):
             download_thread = threading.Thread(target=download_file, args=(file_path, server_ip_address, port_number))
             download_thread.start()
         return # sharing_mode, file_path, port_number, server_ip_address
+    
+    def p2p_share_multi(self):
+        dialog = QtWidgets.QDialog()
+        
+        items = ["broadcast", "download"]
+        # get the sharing mode
+        sharing_mode, ok = QtWidgets.QInputDialog.getItem(dialog, "Sharing Mode", "Enter sharing mode:", items, 0, False)
+        if not ok:
+            return None, None, None, None
+        # get the file path
+        if sharing_mode == "broadcast":    
+            file_path, format=  QFileDialog.getOpenFileName(None, "Open File", "", "(*.*)")
+            if file_path == "":
+                return None, None, None, None
+        elif sharing_mode == "download":
+            format, ok = QtWidgets.QInputDialog.getText(dialog, "File Format", "Enter file format:")
+            if not ok:
+                return None, None, None, None
+            directory_path = QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory", "", options=QtWidgets.QFileDialog.ShowDirsOnly)
+            if directory_path == "":
+                return None, None, None, None
+            i = 1
+            while True:
+                file_name = str(i) + '.' + format
+                file_path = directory_path + '/'+ file_name
+                if not os.path.exists(file_path):
+                    break
+                i += 1
+
+        if sharing_mode == "broadcast":    
+            port_number, ok = QtWidgets.QInputDialog.getInt(dialog, "Port Number", "Enter port number:")
+            if not ok:
+                return None, None, None, None
+        elif sharing_mode == "download":
+            server_ip_address1, ok = QtWidgets.QInputDialog.getText(dialog, "Server IP Address1", "Enter server IP address1:")
+            if not ok:
+                return None, None, None, None
+            port_number1, ok = QtWidgets.QInputDialog.getInt(dialog, "Port Number1", "Enter port number1:")
+            if not ok:
+                return None, None, None, None
+            server_ip_address2, ok = QtWidgets.QInputDialog.getText(dialog, "Server IP Address2", "Enter server IP address2:")
+            if not ok:
+                return None, None, None, None
+            port_number2, ok = QtWidgets.QInputDialog.getInt(dialog, "Port Number2", "Enter port number2:")
+            if not ok:
+                return None, None, None, None
+        
+        
+        if sharing_mode == "broadcast":
+            broadcast_thread = threading.Thread(target=broadcast_file, args=(file_path, port_number))
+            broadcast_thread.start()
+        elif sharing_mode == "download":
+            download_thread = threading.Thread(target=download_file_multi, args=(file_path, server_ip_address1, port_number1 , server_ip_address2, port_number2))
+            download_thread.start()
+        return
 
         
  
