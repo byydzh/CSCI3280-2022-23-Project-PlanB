@@ -814,9 +814,9 @@ QListView::item:selected {
          <widget class="QWidget" name="">
           <property name="geometry">
            <rect>
-            <x>10</x>
+            <x>11</x>
             <y>10</y>
-            <width>941</width>
+            <width>931</width>
             <height>42</height>
            </rect>
           </property>
@@ -1278,6 +1278,42 @@ QPushButton:hover{
 }
 QPushButton:hover{
 	image: url(:/icon/images/列表循环 深色.png);
+}</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_random_2">
+             <property name="minimumSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="cursor">
+              <cursorShape>PointingHandCursor</cursorShape>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton{
+	image: url(./images/info.png);
+}
+QPushButton:hover{
+	image: url(./images/info2.png);
 }</string>
              </property>
              <property name="text">

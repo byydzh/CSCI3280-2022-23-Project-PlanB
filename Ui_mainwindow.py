@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'd:\cuhk\22-23 term2\CSCI3280\Project\CSCI3280-2022-23-Project-PlanB-main\mainwindow.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -385,7 +385,7 @@ class Ui_MainWindow(object):
 "    }")
         self.widget_bottom.setObjectName("widget_bottom")
         self.widget1 = QtWidgets.QWidget(self.widget_bottom)
-        self.widget1.setGeometry(QtCore.QRect(10, 10, 941, 42))
+        self.widget1.setGeometry(QtCore.QRect(11, 10, 931, 42))
         self.widget1.setObjectName("widget1")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.widget1)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -636,6 +636,21 @@ class Ui_MainWindow(object):
         self.pushButton_random.setFlat(True)
         self.pushButton_random.setObjectName("pushButton_random")
         self.horizontalLayout_2.addWidget(self.pushButton_random)
+        self.pushButton_random_2 = QtWidgets.QPushButton(self.widget1)
+        self.pushButton_random_2.setMinimumSize(QtCore.QSize(30, 30))
+        self.pushButton_random_2.setMaximumSize(QtCore.QSize(30, 30))
+        self.pushButton_random_2.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.pushButton_random_2.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.pushButton_random_2.setStyleSheet("QPushButton{\n"
+"    image: url(./images/info.png);\n"
+"}\n"
+"QPushButton:hover{\n"
+"    image: url(./images/info2.png);\n"
+"}")
+        self.pushButton_random_2.setText("")
+        self.pushButton_random_2.setFlat(True)
+        self.pushButton_random_2.setObjectName("pushButton_random_2")
+        self.horizontalLayout_2.addWidget(self.pushButton_random_2)
         self.verticalLayout_5.addWidget(self.widget_bottom)
         self.horizontalLayout_9.addWidget(self.widget)
         MainWindow.setCentralWidget(self.centralwidget)
