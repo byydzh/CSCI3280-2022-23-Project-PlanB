@@ -7,6 +7,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtWidgets import QListWidgetItem
 from pypinyin import lazy_pinyin, Style
 from pydub import AudioSegment
+from PyQt5.QtWidgets import QMessageBox
 
 import sqlite3
 import os
@@ -15,12 +16,14 @@ import random
 import json
 
 
+
 from sqlite_lib import UsingSqlite
 from Ui_mainwindow import Ui_MainWindow
 from songs import Song
 
 import socket
 import threading
+
 sharing = 0
 VERSION = 'v0.2.0'
 third_party_db_path = ""
@@ -109,6 +112,7 @@ def download_file_multi(file_path, host1, port1, host2, port2):
 
     print(f"File downloaded: {file_path}")
 
+
 def download_file_living(file_path, host, port):
     download_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     download_socket.connect((host, port))
@@ -147,21 +151,7 @@ def split_wav_file(input_file, output_dir, chunk_size=1024):
         chunk.export(os.path.join(output_dir, f"chunk_{i}.wav"), format="wav")
         #print(f"Saved chunk {i + 1} of {num_chunks}")
 
-def create_special_file(filename):
-    with open(filename, "w") as f:
-        f.write(SPECIAL_FILE_IDENTIFIER)
 
-def is_special_file(filename):
-    try:
-        with open(filename, "r") as f:
-            content = f.read()
-            if SPECIAL_FILE_IDENTIFIER in content:
-                return True
-            else:
-                return False
-    except FileNotFoundError:
-        print("File do not exist")
-        return False
 
 
 # make the window draggable
@@ -244,8 +234,8 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_is_online.clicked.connect(self.p2p_share)
         self.ui.pushButton_random.clicked.connect(self.p2p_share_multi)
         self.ui.pushButton_path_2.clicked.connect(self.setthirddir)
+       
         try:
-            
             self.ui.pushButton_is_trans.clicked.connect(self.change_trans_mode)
             self.ui.pushButton_update.clicked.connect(self.get_update)
         
@@ -559,6 +549,29 @@ class PlayerWindow(QtWidgets.QMainWindow):
     def search_song(self):
         if os.path.exists(self.db_path):
             self.select_songs(self.ui.lineEdit.text())
+    def upload_download(self, path):
+        # connect to the database
+        conn = sqlite3.connect(path)
+        # create a cursor object
+        c = conn.cursor()
+        sql = f"select * from music_info "
+        # execute a SELECT statement to retrieve all songs in the database
+        c.execute(sql)
+        # search for a specific song by title
+        # print the results of the search
+        result = c.fetchall()
+        for item in result:
+            new_path = self.directory_path +"/"+ item[1] + ".wav"
+            if not new_path:
+                try:
+                    with open(new_path, "w") as f:
+                        f.write("#")
+                        f.close()
+                except Exception:
+                    continue
+        # close the cursor and database connection
+        c.close()
+        conn.close()
 
     def setthirddir(self):
         global third_party_db_path
@@ -566,6 +579,8 @@ class PlayerWindow(QtWidgets.QMainWindow):
         if dir == "":
             return
         third_party_db_path = dir
+        self.upload_download(third_party_db_path)
+
         
     def select_songs(self, text):
         with UsingSqlite() as us:
@@ -605,7 +620,6 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.ui.label_list_name.setText(f'song list({count})')
 
     def update_songs(self):
-
         def list_compare(local_list, db_list):
             local_list = set(local_list)
             db_list = set(db_list)
@@ -737,8 +751,23 @@ class PlayerWindow(QtWidgets.QMainWindow):
         self.song_now_path = self.song_path_playlist[self.song_index]['path']
         self.play_init()
         self.song_find()
+    
+    def is_special_file(self, filename):
+        try:
+            with open(filename, "r") as f:
+                content = f.read()
+                if "#" in content:
+                    return True
+                else:
+                    return False
+        except Exception:
+            print("File do not exist")
+            return False
 
     def song_play(self):
+        print(self.song_path_playlist[self.song_index]['path'])
+        if self.is_special_file(self.song_path_playlist[self.song_index]['path']) is True:
+            QtWidgets.QMessageBox.information(self, "warning", 'please download it online', QtWidgets.QMessageBox.Ok)
         self.player.play()
         self.lrc_timer.start(500)
         self.is_started = True
@@ -760,6 +789,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
                                                "QPushButton:hover{\n"
                                                "image: url(./images/play button2d.png);\n}")
         
+    
     def song_start_switch(self):
         if self.song_now_path == '' and self.local_songs_count != 0:
             self.play_next()
