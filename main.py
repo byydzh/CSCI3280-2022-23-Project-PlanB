@@ -12,6 +12,7 @@ import sys
 import random
 import json
 
+
 from sqlite_lib import UsingSqlite
 from Ui_mainwindow import Ui_MainWindow
 from songs import Song
@@ -62,19 +63,48 @@ def download_file_multi(file_path, host1, port1, host2, port2):
     download_socket1.connect((host1, port1))
     download_socket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     download_socket2.connect((host2, port2))
-    with open(file_path, "wb") as file:
+    file_data1 = bytearray()
+    file_data2 = bytearray()
+
+    chunk1 = download_socket1.recv(1024)
+    chunk2 = download_socket2.recv(1024)
+    while chunk1:
+        file_data1.extend(chunk1)
         chunk1 = download_socket1.recv(1024)
+    while chunk2:
+        file_data2.extend(chunk2)
         chunk2 = download_socket2.recv(1024)
-        while chunk1:
-            file.write(chunk1)
-            chunk1 = download_socket1.recv(1024)
-            chunk2 = download_socket2.recv(1024)
-            if not chunk1:
-                break
-            file.write(chunk2)
-            chunk1 = download_socket1.recv(1024)
-            chunk2 = download_socket2.recv(1024)
-    
+
+    download_socket1.close()
+    download_socket2.close()
+
+    merged_data = bytearray()
+    i, j = 0, 0
+    flag = 0
+    while i < len(file_data1) and j < len(file_data2):
+        if flag==0:
+            merged_data.append(file_data1[i])
+            flag = 1
+        else:
+            merged_data.append(file_data2[j])
+            flag = 0
+        i += 1
+        j += 1
+
+    while i < len(file_data1):
+        merged_data.append(file_data1[i])
+        i += 1
+
+    while j < len(file_data2):
+        merged_data.append(file_data2[j])
+        j += 1
+
+    with open(file_path, "wb") as file:
+        file.write(merged_data)
+
+    print(f"File downloaded: {file_path}")
+
+
 # make the window draggable
 class DraggableWidget(QWidget):
     def __init__(self, parent=None):
