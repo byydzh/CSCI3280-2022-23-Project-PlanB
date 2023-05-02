@@ -15,6 +15,7 @@ import sys
 import random
 import json
 import music_tag
+import os.path
 
 
 from sqlite_lib import UsingSqlite
@@ -563,7 +564,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         result = c.fetchall()
         for item in result:
             new_path = self.directory_path +"/"+ item[1] + ".wav"
-            if not new_path:
+            if not os.path.exists(new_path):
                 try:
                     with open(new_path, "w") as f:
                         f.write("#")
@@ -769,6 +770,7 @@ class PlayerWindow(QtWidgets.QMainWindow):
         print(self.song_path_playlist[self.song_index]['path'])
         if self.is_special_file(self.song_path_playlist[self.song_index]['path']) is True:
             QtWidgets.QMessageBox.information(self, "warning", 'please download it online', QtWidgets.QMessageBox.Ok)
+            return
         self.player.play()
         self.lrc_timer.start(500)
         self.is_started = True
